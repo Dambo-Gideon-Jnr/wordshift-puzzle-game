@@ -31,18 +31,6 @@ function Logo() {
   );
 }
 
-function Stars({ value, total }: { value: number; total: number }) {
-  return (
-    <span className="whitespace-nowrap">
-      {Array.from({ length: total }, (_, i) => (
-        <span key={i} className={i < value ? "text-amber-400" : "text-slate-300"}>
-          ★
-        </span>
-      ))}
-    </span>
-  );
-}
-
 export default function HomeScreen({
   progress,
   onPlay,
@@ -71,7 +59,9 @@ export default function HomeScreen({
             <span>
               {cleared}/{TOTAL_LEVELS} levels cleared
             </span>
-            <Stars value={stars} total={maxStars()} />
+            <span className="whitespace-nowrap tabular-nums" aria-label={`${stars} of ${maxStars()} stars`}>
+              ★ {stars}/{maxStars()}
+            </span>
           </div>
 
           <button
@@ -100,7 +90,7 @@ export default function HomeScreen({
           </div>
 
           <p className="text-center text-xs text-slate-400">
-            {totalWordCount()}+ words · {CHAPTERS.length} chapters · stars unlock nothing but bragging rights
+            {totalWordCount()}+ words · {CHAPTERS.length} chapters · earn stars to unlock new levels
           </p>
         </div>
 

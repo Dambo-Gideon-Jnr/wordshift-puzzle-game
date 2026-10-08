@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   CHAPTERS,
   LEVELS_PER_CHAPTER,
@@ -8,6 +9,8 @@ import {
 } from "../data/levels";
 import { TIERS } from "../data/words";
 import { totalStars, type Progress } from "../utils/progress";
+
+const LEVELS_PER_PAGE = 20;
 
 interface LevelSelectProps {
   progress: Progress;
@@ -29,6 +32,10 @@ function StarRow({ value }: { value: number }) {
 
 export default function LevelSelect({ progress, onSelect, onBack }: LevelSelectProps) {
   const earned = totalStars(progress);
+  const [page, setPage] = useState(0);
+  const pageCount = Math.ceil(LEVELS_PER_CHAPTER / LEVELS_PER_PAGE);
+  const firstVisibleLevel = page * LEVELS_PER_PAGE + 1;
+  const lastVisibleLevel = Math.min((page + 1) * LEVELS_PER_PAGE, LEVELS_PER_CHAPTER);
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-4xl px-4 py-6">
@@ -44,6 +51,31 @@ export default function LevelSelect({ progress, onSelect, onBack }: LevelSelectP
           ★ {earned} / {maxStars()}
         </div>
       </header>
+
+      <nav
+        aria-label="Level map pages"
+        className="mt-4 flex items-center justify-between rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-600 shadow-sm ring-1 ring-slate-200"
+      >
+        <button
+          type="button"
+          onClick={() => setPage((current) => Math.max(0, current - 1))}
+          disabled={page === 0}
+          className="rounded-lg px-3 py-2 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          ← Previous
+        </button>
+        <span className="tabular-nums">
+          Levels {firstVisibleLevel}–{lastVisibleLevel} of {LEVELS_PER_CHAPTER}
+        </span>
+        <button
+          type="button"
+          onClick={() => setPage((current) => Math.min(pageCount - 1, current + 1))}
+          disabled={page === pageCount - 1}
+          className="rounded-lg px-3 py-2 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Next →
+        </button>
+      </nav>
 
       <div className="mt-4 space-y-5">
         {CHAPTERS.map((chapter) => {
@@ -76,7 +108,7 @@ export default function LevelSelect({ progress, onSelect, onBack }: LevelSelectP
               </div>
 
               <div className="grid grid-cols-3 gap-3 p-4 sm:grid-cols-6">
-                {levels.map((level) => {
+                {levels.slice(page * LEVELS_PER_PAGE, (page + 1) * LEVELS_PER_PAGE).map((level) => {
                   const stars = progress.stars[level] ?? 0;
                   const best = progress.best[level] ?? 0;
                   const locked = level > progress.unlocked;
